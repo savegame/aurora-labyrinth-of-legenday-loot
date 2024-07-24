@@ -1,8 +1,7 @@
 %define firejail_section X-Application
-# %if ! "0%{?_app_orgname}"
 %if ! %{defined _app_orgname}
 %define _app_orgname ru.sashikknox
-%define _app_appname love2d
+%define _app_appname mobius
 %endif
 %if "0%{?_oldaurora}"
 %define xauroraapp "\#[X-Aurora-Application]\#IconMode=Crop"
@@ -11,11 +10,11 @@
 %endif
 
 Name:       %{_app_orgname}.%{_app_appname}
-Summary:    Love2D Game Engine
+Summary:    Love2D Game Example for AuroraOS
 Release:    1
-Version:    11.3.0
+Version:    1.0.0
 Group:      Amusements/Games
-License:    zlib
+License:    BSD3
 Source0:    %{name}.tar.gz
 
 %define __requires_exclude ^libvorbis.*\\.so.*|libopenal\\.so.*|libmpg123\\.so.*|libfreetype\\.so.*|libharfbuzz\\.so.*|libmodplug\\.so.*|libtheora\\.so.*|libtheoradec\\.so.*|libgraphite2\\.so.*|libliblove\\.so.*$
@@ -34,9 +33,7 @@ BuildRequires: rsync
 BuildRequires: patchelf
 
 %description
-"LÖVE is an *awesome* framework you can use to make 2D games in Lua. 
-It's free, open-source, and works on Windows, macOS, Linux, Android, iOS 
-and AuroraOS."
+"Game example for AuroraOS made with LÖVE engine"
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -106,6 +103,10 @@ sed -i "s/#/\n/g" %{name}.desktop
 
 install -m 655 -D %{name}.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
 
+pushd game
+zip -FS -r -y %{buildroot}%{_datadir}/%{name}/game.love *
+popd
+
 %files
 %defattr(-,root,root,-)
 %attr(755,root,root) %{_bindir}/%{name}
@@ -113,5 +114,5 @@ install -m 655 -D %{name}.desktop %{buildroot}%{_datadir}/applications/%{name}.d
 %{_datadir}/icons/hicolor/108x108/apps/%{name}.png
 %{_datadir}/icons/hicolor/128x128/apps/%{name}.png
 %{_datadir}/icons/hicolor/172x172/apps/%{name}.png
-%{_datadir}/%{name}/lib/*
+%{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop

@@ -1,13 +1,12 @@
 [Desktop Entry]
-Name=LÖVE
-Comment=The unquestionably awesome 2D game engine
+Name=Spaceship
+Comment=Simple game in space
 MimeType=application/x-love-game;
-Exec=/usr/local/bin/love %f
 Type=Application
 Categories=Development;Game;
 X-Nemo-Application-Type=no-invoker
 Icon=__ORGNAME__.__APPNAME__
-Exec=__ORGNAME__.__APPNAME__
+Exec=__ORGNAME__.__APPNAME__ /usr/share/__ORGNAME__.__APPNAME__/game.love
 
 [__X_APPLICATION__]
 Permissions=Internet;Audio
