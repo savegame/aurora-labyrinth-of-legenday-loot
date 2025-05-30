@@ -1,13 +1,6 @@
-%define firejail_section X-Application
-%if ! %{defined _app_orgname}
 %define _app_orgname ru.sashikknox
-%define _app_appname mobius
-%endif
-%if "0%{?_oldaurora}"
-%define xauroraapp "\#[X-Aurora-Application]\#IconMode=Crop"
-%else
-%define xauroraapp ""
-%endif
+%define _app_appname AwesomeGame
+%define _app_launcher_name Офигенная игра
 
 Name:       %{_app_orgname}.%{_app_appname}
 Summary:    Love2D Game Example for AuroraOS
@@ -31,6 +24,7 @@ BuildRequires: pkgconfig(libmpg123)
 BuildRequires: pkgconfig(wayland-client)
 BuildRequires: rsync
 BuildRequires: patchelf
+BuildRequires: zip
 
 %description
 "Game example for AuroraOS made with LÖVE engine"
@@ -98,7 +92,7 @@ install -m 655 -D icons/172.png %{buildroot}%{_datadir}/icons/hicolor/172x172/ap
 sed "s/__ORGNAME__/%{_app_orgname}/g" love.desktop.in>%{name}.desktop
 sed -i "s/__APPNAME__/%{_app_appname}/g" %{name}.desktop
 sed -i "s/__X_APPLICATION__/%{firejail_section}/g" %{name}.desktop
-sed -i "s/__X_AURORA_APP__/%{xauroraapp}/g" %{name}.desktop
+sed -i "s/__LAUNCHER_NAME__/%{_app_launcher_name}/g" %{name}.desktop
 sed -i "s/#/\n/g" %{name}.desktop
 
 install -m 655 -D %{name}.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop

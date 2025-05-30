@@ -1,16 +1,14 @@
 [Desktop Entry]
-Name=Spaceship
+Name=__LAUNCHER_NAME__
 Comment=Simple game in space
 MimeType=application/x-love-game;
 Type=Application
-Categories=Development;Game;
+Categories=Game;
 X-Nemo-Application-Type=no-invoker
 Icon=__ORGNAME__.__APPNAME__
 Exec=__ORGNAME__.__APPNAME__ /usr/share/__ORGNAME__.__APPNAME__/game.love
 
-[__X_APPLICATION__]
+[X-Application]
 Permissions=Internet;Audio
 OrganizationName=__ORGNAME__
 ApplicationName=__APPNAME__
-
-__X_AURORA_APP__
