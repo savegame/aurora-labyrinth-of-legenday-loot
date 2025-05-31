@@ -13,7 +13,6 @@ Source0:    %{name}.tar.gz
 %define __requires_exclude ^libvorbis.*\\.so.*|libopenal\\.so.*|libmpg123\\.so.*|libfreetype\\.so.*|libharfbuzz\\.so.*|libmodplug\\.so.*|libtheora\\.so.*|libtheoradec\\.so.*|libgraphite2\\.so.*|libliblove\\.so.*$
 %define __provides_exclude_from ^%{_datadir}/%{name}/lib/.*\\.so.*$
 
-BuildRequires: pkgconfig(sdl2)
 BuildRequires: pkgconfig(openal)
 BuildRequires: pkgconfig(harfbuzz)
 BuildRequires: pkgconfig(theoradec)
@@ -22,15 +21,38 @@ BuildRequires: pkgconfig(zlib)
 BuildRequires: pkgconfig(freetype2)
 BuildRequires: pkgconfig(libmpg123)
 BuildRequires: pkgconfig(wayland-client)
+BuildRequires: pkgconfig(wayland-cursor)
+BuildRequires: pkgconfig(wayland-egl)
+BuildRequires: pkgconfig(wayland-protocols)
+BuildRequires: pkgconfig(wayland-scanner)
+BuildRequires: pkgconfig(glesv2)
+BuildRequires: pkgconfig(xkbcommon)
+BuildRequires: pkgconfig(vulkan)
+BuildRequires: pkgconfig(egl)
 BuildRequires: rsync
 BuildRequires: patchelf
 BuildRequires: zip
+BuildRequires: ninja
 
 %description
 "Game example for AuroraOS made with LÖVE engine"
 
 %prep
 %setup -q -n %{name}-%{version}
+
+cmake \
+    -G Ninja \
+    -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja \
+    -Bbuild_libsdl_%{_arch} \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DSDL_PULSEAUDIO=OFF \
+    -DSDL_RPATH=OFF \
+    -DSDL_AUDIO=OFF \
+    -DSDL_STATIC=OFF \
+    -DSDL_WAYLAND=ON \
+    -DSDL_X11=OFF \
+    -DSDL_WAYLAND_LIBDECOR=OFF \
+    libsdl
 
 cmake -Bbuild_libmodplug_%{_arch} \
     -DCMAKE_BUILD_TYPE=Release \
@@ -44,6 +66,8 @@ popd
 
 
 %build
+cmake --build build_libsdl_%{_arch} -j`nproc`
+
 pushd build_libmodplug_%{_arch}
 make -j`nproc`
 make DESTDIR=`pwd` install
@@ -79,6 +103,7 @@ install -D %{_libdir}/libopenal.so* -t %{buildroot}%{_datadir}/%{name}/lib
 install -D %{_libdir}/libfreetype.so* -t %{buildroot}%{_datadir}/%{name}/lib
 install -D %{_libdir}/libmpg123.so* -t %{buildroot}%{_datadir}/%{name}/lib
 
+install -D -s build_libsdl_%{_arch}/libSDL2-2.0.so* -t %{buildroot}%{_datadir}/%{name}/lib
 install -D -s build_libmodplug_%{_arch}/libmodplug.so.1* -t %{buildroot}%{_datadir}/%{name}/lib
 patchelf --force-rpath --set-rpath %{_datadir}/%{name}/lib build_love_%{_arch}/libliblove.so
 install -D -s build_love_%{_arch}/libliblove.so -t %{buildroot}%{_datadir}/%{name}/lib
