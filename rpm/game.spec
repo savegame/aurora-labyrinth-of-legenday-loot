@@ -29,10 +29,12 @@ BuildRequires: pkgconfig(glesv2)
 BuildRequires: pkgconfig(xkbcommon)
 BuildRequires: pkgconfig(vulkan)
 BuildRequires: pkgconfig(egl)
+BuildRequires: pkgconfig(sdl2)
 BuildRequires: rsync
 BuildRequires: patchelf
 BuildRequires: zip
 BuildRequires: ninja
+BuildRequires: lua
 
 %description
 "Game example for AuroraOS made with LÖVE engine"
@@ -43,7 +45,7 @@ BuildRequires: ninja
 cmake \
     -G Ninja \
     -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja \
-    -Bbuild_libsdl_%{_arch} \
+    -Bbuild/%{_arch}/libsdl \
     -DCMAKE_BUILD_TYPE=Release \
     -DSDL_PULSEAUDIO=OFF \
     -DSDL_RPATH=OFF \
@@ -54,43 +56,45 @@ cmake \
     -DSDL_WAYLAND_LIBDECOR=OFF \
     libsdl
 
-cmake -Bbuild_libmodplug_%{_arch} \
+cmake -Bbuild/%{_arch}/libmodplug \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=ON \
     libmodplug
 
-# clean previous build data in LuaJIT
-pushd LuaJIT
-make clean 
-popd
+# clone to build dir
+rsync -aP LuaJIT/* build/%{_arch}/LuaJIT/
 
 
 %build
-cmake --build build_libsdl_%{_arch} -j`nproc`
-
-pushd build_libmodplug_%{_arch}
+cmake --build build/%{_arch}/libsdl -j`nproc`
+pushd build/%{_arch}/libmodplug
 make -j`nproc`
 make DESTDIR=`pwd` install
 popd 
 
-pushd LuaJIT
+pushd build/%{_arch}/LuaJIT
 make -j`nproc`
+popd
+# update scripts
+pushd love/src/scripts
+lua auto.lua boot nogame
 popd
 
 cmake \
-    -Bbuild_love_%{_arch} \
+    -G Ninja \
+    -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja \
+    -Bbuild/%{_arch}/love \
     -DAURORAOS=YES \
+    -DAURORAOS_APPDATA="%{_app_orgname}/%{_app_appname}" \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DMODPLUG_INCLUDE_DIR=build_libmodplug_%{_arch}/usr/local/include \
-    -DMODPLUG_LIBRARY=build_libmodplug_%{_arch}/libmodplug.so.1.0.0 \
-    -DLUAJIT_INCLUDE_DIR=LuaJIT/src/ \
-    -DLUAJIT_LIBRARY=LuaJIT/src/libluajit.a \
+    -DMODPLUG_INCLUDE_DIR=build/%{_arch}/libmodplug/usr/local/include \
+    -DMODPLUG_LIBRARY=build/%{_arch}/libmodplug/libmodplug.so.1.0.0 \
+    -DLUAJIT_INCLUDE_DIR=build/%{_arch}/LuaJIT/src/ \
+    -DLUAJIT_LIBRARY=build/%{_arch}/LuaJIT/src/libluajit.a \
     -DLOVE_EXE_NAME=%{name} \
     -DLOVE_LIB_NAME="love-11.0" \
     love
-pushd build_love_%{_arch}
-make -j`nproc`
-popd
+cmake --build build/%{_arch}/love -j`nproc`
 
 
 %install
@@ -103,12 +107,12 @@ install -D %{_libdir}/libopenal.so* -t %{buildroot}%{_datadir}/%{name}/lib
 install -D %{_libdir}/libfreetype.so* -t %{buildroot}%{_datadir}/%{name}/lib
 install -D %{_libdir}/libmpg123.so* -t %{buildroot}%{_datadir}/%{name}/lib
 
-install -D -s build_libsdl_%{_arch}/libSDL2-2.0.so* -t %{buildroot}%{_datadir}/%{name}/lib
-install -D -s build_libmodplug_%{_arch}/libmodplug.so.1* -t %{buildroot}%{_datadir}/%{name}/lib
-patchelf --force-rpath --set-rpath %{_datadir}/%{name}/lib build_love_%{_arch}/libliblove.so
-install -D -s build_love_%{_arch}/libliblove.so -t %{buildroot}%{_datadir}/%{name}/lib
-patchelf --force-rpath --set-rpath %{_datadir}/%{name}/lib build_love_%{_arch}/love
-install -D -s build_love_%{_arch}/love  %{buildroot}%{_bindir}/%{name}
+install -D -s build/%{_arch}/libsdl/libSDL2-2.0.so* -t %{buildroot}%{_datadir}/%{name}/lib
+install -D -s build/%{_arch}/libmodplug/libmodplug.so.1* -t %{buildroot}%{_datadir}/%{name}/lib
+patchelf --force-rpath --set-rpath %{_datadir}/%{name}/lib build/%{_arch}/love/libliblove.so
+install -D -s build/%{_arch}/love/libliblove.so -t %{buildroot}%{_datadir}/%{name}/lib
+patchelf --force-rpath --set-rpath %{_datadir}/%{name}/lib build/%{_arch}/love/love
+install -D -s build/%{_arch}/love/love  %{buildroot}%{_bindir}/%{name}
 install -m 655 -D icons/86.png  %{buildroot}%{_datadir}/icons/hicolor/86x86/apps/%{name}.png
 install -m 655 -D icons/108.png %{buildroot}%{_datadir}/icons/hicolor/108x108/apps/%{name}.png
 install -m 655 -D icons/128.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/%{name}.png
@@ -118,7 +122,6 @@ sed "s/__ORGNAME__/%{_app_orgname}/g" love.desktop.in>%{name}.desktop
 sed -i "s/__APPNAME__/%{_app_appname}/g" %{name}.desktop
 sed -i "s/__X_APPLICATION__/%{firejail_section}/g" %{name}.desktop
 sed -i "s/__LAUNCHER_NAME__/%{_app_launcher_name}/g" %{name}.desktop
-sed -i "s/#/\n/g" %{name}.desktop
 
 install -m 655 -D %{name}.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
 

@@ -1,4 +1,5 @@
-build_*
-*build_*
+build/*
 *.a
 *.o
+game/*
+game*

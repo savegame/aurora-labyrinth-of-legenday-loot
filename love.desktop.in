@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=__LAUNCHER_NAME__
-Comment=Simple game in space
+Comment=Awesome game with Love
 MimeType=application/x-love-game;
 Type=Application
 Categories=Game;
@@ -12,3 +12,10 @@ Exec=__ORGNAME__.__APPNAME__ /usr/share/__ORGNAME__.__APPNAME__/game.love
 Permissions=Internet;Audio
 OrganizationName=__ORGNAME__
 ApplicationName=__APPNAME__
+
+[X-Aurora-SplashScreen]
+GradientStartColor=#B90E0E
+GradientEndColor=#80B9F5
+
+[X-Aurora-Application]
+Orientation=Landscape
