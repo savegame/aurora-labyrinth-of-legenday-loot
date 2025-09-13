@@ -1,11 +1,11 @@
 %define _app_orgname ru.sashikknox
-%define _app_appname AwesomeGame
-%define _app_launcher_name Офигенная игра
+%define _app_appname labyrinth
+%define _app_launcher_name Labyrinth Of Legendary Loot
 
 Name:       %{_app_orgname}.%{_app_appname}
-Summary:    Love2D Game Example for AuroraOS
+Summary:    Labyrinth Of Legendary Loot
 Release:    1
-Version:    1.0.0
+Version:    1.12
 Group:      Amusements/Games
 License:    BSD3
 Source0:    %{name}.tar.gz
@@ -37,7 +37,10 @@ BuildRequires: ninja
 BuildRequires: lua
 
 %description
-"Game example for AuroraOS made with LÖVE engine"
+Labyrinth of Legendary Loot is a simple turn-based roguelike 
+dungeon crawler focused on tactical combat. Every room is 
+almost like a puzzle as you try to figure out the best way 
+to defeat all enemies without taking too much damage
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -63,7 +66,6 @@ cmake -Bbuild/%{_arch}/libmodplug \
 
 # clone to build dir
 rsync -aP LuaJIT/* build/%{_arch}/LuaJIT/
-
 
 %build
 cmake --build build/%{_arch}/libsdl -j`nproc`
